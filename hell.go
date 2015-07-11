@@ -10,8 +10,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
-//	"container/list"
 	"./Vector"
+	"go/token"
+//	"bytes"
+	"go/parser"
+//	"go/printer"
+	"./node"
+	"go/ast"
 )
 
 func check(e error) {
@@ -19,6 +24,11 @@ func check(e error) {
 		panic(e)
 	}
 }
+
+
+
+
+
 
 func StringsToArray(arr0 []string) []interface{} {
 	res := make([]interface{}, len(arr0))
@@ -43,21 +53,109 @@ func ArrayJoin(arr []interface{}, sep interface{}) []interface{} {
 }
 
 
+type simplifierX struct {
+	hasDotImport bool // package file contains: import . "some/import/path"
+}
 
+func (s *simplifierX) Visit(node ast.Node) ast.Visitor {
+	fmt.Println("OLOLO")
+	return s
+}
 
 
 func main() {
 
+	fset := token.NewFileSet()
 
-//	dbg0 := StringsToArray(strings.Split("((dsad))", "("))
+
+	decl := "func sum(x, y int) int\t{ return x + y }";
+	file, err := parser.ParseFile(fset, "", "package p;"+decl, 0)
+	if err != nil {
+		panic(err) // error in test
+	}
+	fmt.Println(file)
+
+	fmt.Println("------------------")
+
+
+//	filename := "/Users/obaskakov/IdeaProjects/goCrazy/code.scm"
+//	src := node.ParseFile(fset, filename, nil)
+//	var s simplifierX
+//	ast.Walk(&s, src)
+
+
+
+//	src := *ast.File {
+//		Package: 0,
+//		Name: *ast.Ident {
+//			NamePos: 0,
+//			Name: "p",
+//		},
+//		Decls: []ast.Decl {
+//	*ast.FuncDecl {
+//		Name: *ast.Ident {
+//			NamePos: 0,
+//			Name: "f",
+//		},
+//		Type: *ast.FuncType {
+//			Func: 0,
+//		},
+//	},
+//},
+//}
+
+
+
+//		res := &ast.File {
+//		Package: 0,
+//		Name: &ast.Ident {
+//		NamePos: 0,
+//		Name: "p",
+//		},
+//		}
 //
-//	dbg1 := ArrayJoin(dbg0, "[")
-//
-//	fmt.Println("dbg =")
-//	for _,x := range dbg1 {
-//		fmt.Println(x)
+
+	err = node.Print(fset, file)
+
+//	fmt.Println(res)
+
+
+
+//	var buf bytes.Buffer
+	fset = token.NewFileSet()
+
+//	err = printer.Fprint(&buf, fset, file)
+//	if err != nil {
+//		panic(err)
 //	}
-//	fmt.Println("----------")
+//	got := buf.String()
+//
+//	fmt.Println(got)
+
+
+//	if err != nil {
+//		panic(err)
+//	}
+//	got1 := buf.String()
+//	fmt.Println(got1)
+
+}
+
+
+func main2() {
+
+
+
+
+	//	dbg0 := StringsToArray(strings.Split("((dsad))", "("))
+	//
+	//	dbg1 := ArrayJoin(dbg0, "[")
+	//
+	//	fmt.Println("dbg =")
+	//	for _,x := range dbg1 {
+	//		fmt.Println(x)
+	//	}
+	//	fmt.Println("----------")
 
 	dat, err := ioutil.ReadFile("/Users/obaskakov/IdeaProjects/goCrazy/code.scm")
 	check(err)
@@ -68,42 +166,41 @@ func main() {
 	lines1 := StringsToArray(lines)
 
 
-//	fmt.Println(len(lines1))
+	//	fmt.Println(len(lines1))
 
-	tokens := Vector.FromArray(lines1).FlatMap(func (x interface{}) []interface{} {
+	tokens := Vector.FromArray(lines1).FlatMap(func(x interface{}) []interface{} {
 		lll := x.(string)
 		tmp := strings.Split(lll, "\t")
 		return StringsToArray(tmp)
-	}).FlatMap(func (x interface{}) []interface{} {
+	}).FlatMap(func(x interface{}) []interface{} {
 		return StringsToArray(strings.Split(x.(string), " "))
-	}).FlatMap(func (x interface{}) []interface{} {
+	}).FlatMap(func(x interface{}) []interface{} {
 		tmp := StringsToArray(strings.Split(x.(string), "("))
 		return ArrayJoin(tmp, "(")
-	}).FlatMap(func (x interface{}) []interface{} {
+	}).FlatMap(func(x interface{}) []interface{} {
 		tmp := StringsToArray(strings.Split(x.(string), ")"))
 		return ArrayJoin(tmp, ")")
-	}).Filter(func (x interface{}) bool {
+	}).Filter(func(x interface{}) bool {
 		return len(x.(string)) != 0
 	}).ToArray()
 
 
 	fmt.Println("tokens:")
-	for _,x := range tokens {
+	for _, x := range tokens {
 		fmt.Println(x)
 	}
 	fmt.Println("----")
 
-//	fmt.Println(strings.Join(append(str0, tokens), "\n"))
+	//	fmt.Println(strings.Join(append(str0, tokens), "\n"))
 
 
+	//	tmp2 := flatMap(tmp1, func(x Object) []Object {return []Object{1,2,3, x}})
 
-//	tmp2 := flatMap(tmp1, func(x Object) []Object {return []Object{1,2,3, x}})
+	//	xxx := []string{"1", "2222"}
 
-//	xxx := []string{"1", "2222"}
+	//	tmp2 := Map(func(x string) int {return len(x)}, xxx)
 
-//	tmp2 := Map(func(x string) int {return len(x)}, xxx)
-
-//	fmt.Println(tmp2)
+	//	fmt.Println(tmp2)
 
 	// Create a new list and put some numbers in it.
 	ll := Vector.New()
@@ -111,15 +208,15 @@ func main() {
 	ll.PushBack("das")
 
 
-//	fmt.Println("----")
-//	fmt.Println(e4.Value)
+	//	fmt.Println("----")
+	//	fmt.Println(e4.Value)
 
 	tmp2 := ll.
-		Map(func (x interface{}) interface{} {
-			return len(x.(string))
-		}).Map(func (x interface{}) interface{} {
-			return x.(int) + 1
-		})
+	Map(func(x interface{}) interface{} {
+		return len(x.(string))
+	}).Map(func(x interface{}) interface{} {
+		return x.(int) + 1
+	})
 
 	fmt.Println("----")
 	// Iterate through list and print its contents.
@@ -130,4 +227,11 @@ func main() {
 	fmt.Println("----")
 	fmt.Println(tmp2.ToArray())
 
+
+
+	//	qqq := nil
+
 }
+
+
+

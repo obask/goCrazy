@@ -8,6 +8,10 @@ import (
 	"errors"
 	"io"
 	"bytes"
+	"strings"
+	"./vector"
+	"go/parser"
+
 )
 
 // The parser structure holds the parser's internal state.
@@ -108,6 +112,7 @@ func (p *parser) parseOperand(lhs bool) ast.Expr {
 func (p *parser) next() {
 	p.leadComment = nil
 	p.lineComment = nil
+//	prev := p.pos
 	p.pos, p.tok, p.lit = p.scanner.Scan()
 }
 
@@ -327,3 +332,154 @@ func ParseFile(fset *token.FileSet, filename string, src interface{}) *ast.File 
 		},
 	}
 }
+
+
+
+
+
+func StringsToArray(arr0 []string) []interface{} {
+	res := make([]interface{}, len(arr0))
+	for i,x := range arr0 {
+		res[i] = x
+	}
+	return res
+}
+
+func ArrayJoin(arr []interface{}, sep interface{}) []interface{} {
+	if len(arr) == 0 {
+		return []interface{}{}
+	} else {
+		var res []interface{}
+		res = append(res, arr[0])
+		for _, z := range arr[1:] {
+			res = append(res, sep)
+			res = append(res, z)
+		}
+		return res
+	}
+}
+
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
+
+
+func oldImplementation() {
+
+	dat, err := ioutil.ReadFile("/Users/obaskakov/IdeaProjects/goCrazy/code.scm")
+	check(err)
+	code := string(dat)
+	lines := strings.Split(code, "\n")
+
+
+	lines1 := StringsToArray(lines)
+
+
+	//	fmt.Println(len(lines1))
+
+	tokens := vector.FromArray(lines1).FlatMap(func(x interface{}) []interface{} {
+		lll := x.(string)
+		tmp := strings.Split(lll, "\t")
+		return StringsToArray(tmp)
+	}).FlatMap(func(x interface{}) []interface{} {
+		return StringsToArray(strings.Split(x.(string), " "))
+	}).FlatMap(func(x interface{}) []interface{} {
+		tmp := StringsToArray(strings.Split(x.(string), "("))
+		return ArrayJoin(tmp, "(")
+	}).FlatMap(func(x interface{}) []interface{} {
+		tmp := StringsToArray(strings.Split(x.(string), ")"))
+		return ArrayJoin(tmp, ")")
+	}).Filter(func(x interface{}) bool {
+		return len(x.(string)) != 0
+	}).ToArray()
+
+
+	fmt.Println("tokens:")
+	for _, x := range tokens {
+		fmt.Println(x)
+	}
+	fmt.Println("----")
+
+}
+
+func oldImplementation2() {
+
+	ll := vector.New()
+	ll.PushBack("dasdsa")
+	ll.PushBack("das")
+
+
+	//	fmt.Println("----")
+	//	fmt.Println(e4.Value)
+
+	tmp2 := ll.
+	Map(func(x interface{}) interface{} {
+		return len(x.(string))
+	}).Map(func(x interface{}) interface{} {
+		return x.(int) + 1
+	})
+
+	fmt.Println("----")
+	// Iterate through list and print its contents.
+	for e := tmp2.Front(); e != nil; e = e.Next() {
+		fmt.Println("val =", e.Value)
+	}
+
+	fmt.Println("----")
+	fmt.Println(tmp2.ToArray())
+
+}
+
+
+func main3() {
+
+//	fset := token.NewFileSet()
+//
+////	decl := "func sum(x, y int) int\t{ return x + y }";
+////	file, err := ParseFile(fset, "", "package p;"+decl, 0)
+//	if err != nil {
+//		panic(err) // error in test
+//	}
+//	fmt.Println(file)
+//
+//	fmt.Println("------------------")
+//	err = Print(fset, file)
+//
+//	//	fmt.Println(res)
+//
+//
+//
+//	//	var buf bytes.Buffer
+//	fset = token.NewFileSet()
+
+}
+
+//	filename := "/Users/obaskakov/IdeaProjects/goCrazy/code.scm"
+//	src := node.ParseFile(fset, filename, nil)
+//	var s simplifierX
+//	ast.Walk(&s, src)
+
+
+
+//	src := *ast.File {
+//		Package: 0,
+//		Name: *ast.Ident {
+//			NamePos: 0,
+//			Name: "p",
+//		},
+//		Decls: []ast.Decl {
+//	*ast.FuncDecl {
+//		Name: *ast.Ident {
+//			NamePos: 0,
+//			Name: "f",
+//		},
+//		Type: *ast.FuncType {
+//			Func: 0,
+//		},
+//	},
+//},
+//}
+
+

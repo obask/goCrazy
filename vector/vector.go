@@ -9,7 +9,7 @@
 //		// do something with e.Value
 //	}
 //
-package Vector
+package vector
 
 // FIXME it looks like vector but it is not!! replace dLists to []
 
